@@ -2,11 +2,12 @@
 
 ## Full Project Tree
 
-```
+```text
 nest-prisma-template/
 │
 ├── 📦 prisma/
 │   ├── schema.prisma              # Database schema with User & Post models
+│   ├── seed.ts                    # Seed script
 │   └── prisma.config.ts           # Prisma v7 configuration
 │
 ├── 📁 src/
@@ -16,17 +17,41 @@ nest-prisma-template/
 │   │   │   ├── api-standard-response.decorator.ts  # Swagger response decorator
 │   │   │   ├── current-user.decorator.ts          # Extract current user
 │   │   │   ├── roles.decorator.ts                 # Role-based access control
+│   │   │   ├── public.decorator.ts                # Public routes
+│   │   │   ├── skip-log.decorator.ts              # Skip logging
+│   │   │   ├── skip-warp.decorator.ts             # Skip response wrapping
+│   │   │   └── index.ts
+│   │   ├── constant/
+│   │   │   ├── app.constants.ts                   # App constants
+│   │   │   ├── error.constants.ts                 # Error constants
+│   │   │   └── index.ts
+│   │   ├── exceptions/
+│   │   │   ├── app-error.exception.ts             # App error exception
 │   │   │   └── index.ts
 │   │   ├── filters/
 │   │   │   ├── all-exceptions.filter.ts           # Global error handler
+│   │   │   ├── unified-error.filter.ts            # Unified error mapping
 │   │   │   └── index.ts
 │   │   ├── guards/
 │   │   │   ├── roles.guard.ts                     # Authorization guard
+│   │   │   ├── jwt-auth.guard.ts                  # JWT auth guard
 │   │   │   └── index.ts
 │   │   ├── interceptors/
+│   │   │   ├── api-response.interceptor.ts        # Standard API responses
 │   │   │   ├── logging.interceptor.ts             # Request/response logging
 │   │   │   ├── transform.interceptor.ts           # Response transformation
 │   │   │   └── index.ts
+│   │   ├── model/
+│   │   │   └── response/
+│   │   │       ├── factories.ts                   # Response factories
+│   │   │       ├── list-result.dto.ts             # List response DTO
+│   │   │       ├── response-base.dto.ts           # Base response DTO
+│   │   │       └── index.ts
+│   │   ├── strategies/
+│   │   │   ├── jwt.strategy.ts                    # JWT strategy
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   └── pagination.ts                      # Pagination types
 │   │   └── index.ts
 │   │
 │   ├── ⚙️  config/                # Configuration modules
@@ -41,15 +66,28 @@ nest-prisma-template/
 │   ├── 🏗️  infra/                 # Infrastructure layer
 │   │   └── database/
 │   │       └── prisma/
+│   │           ├── extensions/
+│   │           │   ├── logging.extension.ts       # Prisma logging extension
+│   │           │   ├── soft-delete.extension.ts   # Soft delete extension
+│   │           │   └── index.ts
 │   │           ├── prisma.service.ts              # Prisma client wrapper
 │   │           ├── prisma.module.ts               # Global Prisma module
 │   │           └── index.ts
 │   │
 │   ├── 📦 modules/                # Feature modules (DDD domains)
+│   │   ├── auth/                  # Auth domain
+│   │   │   ├── dto/
+│   │   │   │   ├── login.dto.ts                    # Login validation
+│   │   │   │   ├── login-response.dto.ts           # Login response DTO
+│   │   │   │   └── index.ts
+│   │   │   ├── auth.controller.ts                  # Auth endpoints
+│   │   │   ├── auth.service.ts                     # Auth business logic
+│   │   │   └── auth.module.ts                      # Auth module
 │   │   └── users/                 # User domain example
 │   │       ├── dto/
 │   │       │   ├── create-user.dto.ts             # Create user validation
 │   │       │   ├── update-user.dto.ts             # Update user validation
+│   │       │   ├── user.dto.ts                     # User response DTO
 │   │       │   └── index.ts
 │   │       ├── entities/
 │   │       │   ├── user.entity.ts                 # User entity (response)
@@ -68,6 +106,8 @@ nest-prisma-template/
 │   ├── app.e2e-spec.ts
 │   └── jest-e2e.json
 │
+├── 🧱 dist/                        # Build output
+
 ├── 🐳 Docker Files
 │   ├── Dockerfile                                 # Multi-stage optimized build
 │   ├── .dockerignore                              # Docker ignore rules
@@ -75,30 +115,45 @@ nest-prisma-template/
 │
 ├── ⚙️  Configuration Files
 │   ├── .editorconfig                              # Editor configuration
+│   ├── .env                                       # Local environment
 │   ├── .env.example                               # Environment template
 │   ├── .gitignore                                 # Git ignore rules
 │   ├── .prettierrc                                # Prettier config
 │   ├── eslint.config.mjs                          # ESLint config
+│   ├── prisma.config.ts                           # Prisma config entry
 │   ├── nest-cli.json                              # NestJS CLI config
 │   ├── tsconfig.json                              # TypeScript config
 │   └── tsconfig.build.json                        # Build TS config
 │
 ├── 📦 Dependencies
 │   ├── package.json                               # Dependencies & scripts
-│   └── pnpm-lock.yaml                             # Lock file
+│   ├── pnpm-lock.yaml                             # Lock file
+│   └── pnpm-workspace.yaml                        # Workspace settings
+│
+├── 🧰 Tooling
+│   └── Makefile                                   # Task shortcuts
 │
 └── 📚 Documentation
     ├── README.md                                  # Main documentation
-    └── ARCHITECTURE.md                            # Architecture guide
+    ├── SIMPLIFIED_README.md                        # Simplified guide
+    ├── QUICKSTART.md                               # Quickstart steps
+    ├── ARCHITECTURE.md                             # Architecture guide
+    ├── JWT_CONFIGURATION.md                        # JWT setup details
+    ├── PRISMA7_MIGRATION.md                         # Prisma v7 migration notes
+    ├── ENHANCEMENTS.md                             # Enhancements backlog
+    └── FOLDER_STRUCTURE.md                         # Folder structure guide
 ```
 
 ## Module Organization (DDD Pattern)
 
-### Current Modules:
+### Current Modules
+
+- ✅ **Auth Module**: Login flow with DTOs and responses
 - ✅ **Users Module**: Complete CRUD with validation, entities, and DTOs
 
-### Template for New Modules:
-```
+### Template for New Modules
+
+```text
 src/modules/{domain}/
 ├── dto/                     # Data Transfer Objects
 │   ├── create-{entity}.dto.ts
@@ -115,22 +170,26 @@ src/modules/{domain}/
 ## Key Features Implemented
 
 ### ✅ Configuration Layer
+
 - Modular configuration with @nestjs/config
 - Type-safe config interfaces
 - Environment-based settings
 
 ### ✅ Common Utilities
+
 - **Filters**: Global exception handling with Prisma error mapping
 - **Interceptors**: Logging and response transformation
 - **Guards**: Role-based authorization
 - **Decorators**: CurrentUser, Roles, API responses
 
 ### ✅ Infrastructure
+
 - Prisma service with lifecycle hooks
 - Connection management
 - Database cleanup utility (for testing)
 
 ### ✅ API Features
+
 - Global validation pipe
 - Swagger/OpenAPI documentation
 - CORS configuration
@@ -138,6 +197,7 @@ src/modules/{domain}/
 - Graceful shutdown
 
 ### ✅ Development Tools
+
 - Docker Compose for local development
 - Multi-stage Dockerfile for production
 - ESLint + Prettier + EditorConfig
@@ -146,28 +206,30 @@ src/modules/{domain}/
 
 ## File Count by Layer
 
-```
-📊 Statistics:
-├── Configuration Files:    10
-├── Common Utilities:       12
+```text
+📊 Statistics (approx):
+├── Configuration Files:    12
+├── Common Utilities:       26
 ├── Config Modules:         6
-├── Infrastructure:         3
-├── Domain Modules:         8 (Users)
-├── Root Files:             5
-├── Documentation:          2
-└── Total Files:           ~46
+├── Infrastructure:         6
+├── Domain Modules:         14 (Auth + Users)
+├── Root Files:             8
+├── Documentation:          8
+└── Total Files:           ~80
 ```
 
 ## Next Steps
 
-### To Add New Features:
+### To Add New Features
+
 1. Create new module in `src/modules/{domain}`
 2. Define Prisma schema in `prisma/schema.prisma`
 3. Generate Prisma client: `pnpm prisma:generate`
 4. Create DTOs, entities, service, and controller
 5. Register module in `app.module.ts`
 
-### To Deploy:
+### To Deploy
+
 1. Build Docker image: `docker build -t app .`
 2. Set environment variables
 3. Run migrations: `pnpm prisma:migrate`
@@ -175,4 +237,4 @@ src/modules/{domain}/
 
 ---
 
-**This structure provides a solid foundation for scalable, maintainable NestJS applications! 🚀**
+This structure provides a solid foundation for scalable, maintainable NestJS applications. 🚀
