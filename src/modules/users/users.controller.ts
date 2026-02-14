@@ -9,18 +9,17 @@ import {
   HttpCode,
   HttpStatus,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiBearerAuth,
   ApiResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UserDto } from './dto';
-import { ListResultDto } from '../../common/model/response';
+import { ListResult } from '../../common/types/pagination';
+import { PaginationQueryDto } from '../../common/dto';
 import { Public } from '../../common/decorators';
 
 @ApiTags('Users')
@@ -53,25 +52,18 @@ export class UsersController {
 
   /**
    * Get all users with pagination
-   * @param page - Page number (default: 1)
-   * @param limit - Items per page (default: 10, max: 100)
-   * @returns List of users with pagination metadata
    */
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all users (paginated)' })
-  @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-  @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   @ApiResponse({
     status: 200,
     description: 'List of users with pagination',
-    type: ListResultDto,
   })
   findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-  ): Promise<ListResultDto<UserDto>> {
-    return this.usersService.findAll(page, limit);
+    @Query() query: PaginationQueryDto,
+  ): Promise<ListResult<UserDto>> {
+    return this.usersService.findAll(query);
   }
 
   /**

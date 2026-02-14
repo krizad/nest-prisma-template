@@ -28,9 +28,11 @@ nest-prisma-template/
 │   │   ├── exceptions/
 │   │   │   ├── app-error.exception.ts             # App error exception
 │   │   │   └── index.ts
+│   │   ├── dto/
+│   │   │   ├── pagination-query.dto.ts             # Shared pagination DTO
+│   │   │   └── index.ts
 │   │   ├── filters/
-│   │   │   ├── all-exceptions.filter.ts           # Global error handler
-│   │   │   ├── unified-error.filter.ts            # Unified error mapping
+│   │   │   ├── unified-error.filter.ts            # Unified error + Prisma error mapping
 │   │   │   └── index.ts
 │   │   ├── guards/
 │   │   │   ├── roles.guard.ts                     # Authorization guard
@@ -39,7 +41,9 @@ nest-prisma-template/
 │   │   ├── interceptors/
 │   │   │   ├── api-response.interceptor.ts        # Standard API responses
 │   │   │   ├── logging.interceptor.ts             # Request/response logging
-│   │   │   ├── transform.interceptor.ts           # Response transformation
+│   │   │   └── index.ts
+│   │   ├── middleware/
+│   │   │   ├── request-id.middleware.ts            # x-request-id generation
 │   │   │   └── index.ts
 │   │   ├── model/
 │   │   │   └── response/
@@ -61,6 +65,8 @@ nest-prisma-template/
 │   │   ├── database.config.ts                     # Database settings
 │   │   ├── jwt.config.ts                          # JWT settings
 │   │   ├── swagger.config.ts                      # Swagger settings
+│   │   ├── throttle.config.ts                     # Rate limiting settings
+│   │   ├── env.validation.ts                      # Env validation with class-validator
 │   │   └── index.ts
 │   │
 │   ├── 🏗️  infra/                 # Infrastructure layer
@@ -79,9 +85,11 @@ nest-prisma-template/
 │   │   │   ├── dto/
 │   │   │   │   ├── login.dto.ts                    # Login validation
 │   │   │   │   ├── login-response.dto.ts           # Login response DTO
+│   │   │   │   ├── refresh-token.dto.ts            # Refresh token DTO
 │   │   │   │   └── index.ts
 │   │   │   ├── auth.controller.ts                  # Auth endpoints
 │   │   │   ├── auth.service.ts                     # Auth business logic
+│   │   │   ├── auth.service.spec.ts                # Auth unit tests
 │   │   │   └── auth.module.ts                      # Auth module
 │   │   └── users/                 # User domain example
 │   │       ├── dto/
@@ -94,6 +102,7 @@ nest-prisma-template/
 │   │       │   └── index.ts
 │   │       ├── users.controller.ts                # User endpoints
 │   │       ├── users.service.ts                   # User business logic
+│   │       ├── users.service.spec.ts              # User unit tests
 │   │       └── users.module.ts                    # User module
 │   │
 │   ├── app.controller.spec.ts                     # App controller tests
@@ -118,12 +127,21 @@ nest-prisma-template/
 │   ├── .env                                       # Local environment
 │   ├── .env.example                               # Environment template
 │   ├── .gitignore                                 # Git ignore rules
+│   ├── .nvmrc                                     # Node version (20)
 │   ├── .prettierrc                                # Prettier config
+│   ├── commitlint.config.mjs                      # Conventional commits
 │   ├── eslint.config.mjs                          # ESLint config
 │   ├── prisma.config.ts                           # Prisma config entry
 │   ├── nest-cli.json                              # NestJS CLI config
-│   ├── tsconfig.json                              # TypeScript config
+│   ├── tsconfig.json                              # TypeScript config (strict)
 │   └── tsconfig.build.json                        # Build TS config
+│
+├── 🔧 Git Hooks (Husky)
+│   ├── .husky/pre-commit                          # lint-staged on commit
+│   └── .husky/commit-msg                          # Commitlint check
+│
+├── 🚀 CI/CD
+│   └── .github/workflows/ci.yml                   # GitHub Actions pipeline
 │
 ├── 📦 Dependencies
 │   ├── package.json                               # Dependencies & scripts
@@ -133,13 +151,12 @@ nest-prisma-template/
 ├── 🧰 Tooling
 │   └── Makefile                                   # Task shortcuts
 │
-└── 📚 Documentation
-    ├── README.md                                  # Main documentation
+└── 📚 docs/                        # Documentation
     ├── SIMPLIFIED_README.md                        # Simplified guide
     ├── QUICKSTART.md                               # Quickstart steps
     ├── ARCHITECTURE.md                             # Architecture guide
     ├── JWT_CONFIGURATION.md                        # JWT setup details
-    ├── PRISMA7_MIGRATION.md                         # Prisma v7 migration notes
+    ├── PRISMA7_MIGRATION.md                        # Prisma v7 migration notes
     ├── ENHANCEMENTS.md                             # Enhancements backlog
     └── FOLDER_STRUCTURE.md                         # Folder structure guide
 ```

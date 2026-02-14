@@ -6,10 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma';
 import { CreateUserDto, UpdateUserDto, UserDto } from './dto';
-import {
-  ListResultDto,
-  PaginationMetaDto,
-} from '../../common/model/response/list-result.dto';
+import { ListResult } from '../../common/types/pagination';
+import { PaginationQueryDto } from '../../common/dto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma, User } from '@prisma/client';
 
@@ -54,20 +52,31 @@ export class UsersService {
    * Get all users with pagination
    */
   async findAll(
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<ListResultDto<UserDto>> {
-    if (page < 1) page = 1;
-    if (limit < 1 || limit > 100) limit = 10;
-
+    query: PaginationQueryDto,
+  ): Promise<ListResult<UserDto>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = { isActive: true };
+
+    if (query.search) {
+      where.OR = [
+        { firstName: { contains: query.search, mode: 'insensitive' } },
+        { lastName: { contains: query.search, mode: 'insensitive' } },
+        { email: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    const orderField = query.sort ?? 'createdAt';
+    const orderDir = query.order ?? 'desc';
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
-        where: { isActive: true },
+        where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [orderField]: orderDir },
         select: {
           id: true,
           email: true,
@@ -79,22 +88,10 @@ export class UsersService {
           updatedAt: true,
         },
       }),
-      this.prisma.user.count({ where: { isActive: true } }),
+      this.prisma.user.count({ where }),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPreviousPage = page > 1;
-
-    const meta = new PaginationMetaDto();
-    meta.page = page;
-    meta.limit = limit;
-    meta.total = total;
-    meta.totalPages = totalPages;
-    meta.hasNextPage = hasNextPage;
-    meta.hasPreviousPage = hasPreviousPage;
-
-    return new ListResultDto(users as UserDto[], meta);
+    return { items: users as UserDto[], total };
   }
 
   /**

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { softDeleteExtension } from './extensions';
 
 @Injectable()
 export class PrismaService
@@ -14,6 +15,12 @@ export class PrismaService
 {
   private readonly logger = new Logger(PrismaService.name);
   private readonly slowQueryThreshold: number;
+
+  /**
+   * Extended client with soft-delete middleware.
+   * Use `prisma.ext.<model>` when you want automatic soft-delete filtering.
+   */
+  readonly ext;
 
   constructor() {
     // create adapter with your connection string
@@ -35,6 +42,7 @@ export class PrismaService
       },
     });
 
+    this.ext = this.$extends(softDeleteExtension);
     this.slowQueryThreshold = this.resolveSlowQueryThreshold();
     this.registerEventListeners();
   }

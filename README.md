@@ -93,7 +93,7 @@ nest-prisma-template/
 └── tsconfig.json               # TypeScript configuration
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
+See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed architecture documentation.
 
 ## 🚀 Getting Started
 
@@ -191,7 +191,7 @@ pnpm run start:dev
 
 The API will be available at `http://localhost:3000/api/v1`
 
-> 📘 **Prisma 7 Migration**: This project uses Prisma 7. See [PRISMA7_MIGRATION.md](./PRISMA7_MIGRATION.md) for details on new features and breaking changes.
+> 📘 **Prisma 7 Migration**: This project uses Prisma 7. See [PRISMA7_MIGRATION.md](./docs/PRISMA7_MIGRATION.md) for details on new features and breaking changes.
 
 ## 📜 Available Scripts
 
@@ -342,7 +342,7 @@ This boilerplate follows **Clean Architecture** and **Domain-Driven Design** pri
 - **Testable**: Easy to test with mock dependencies
 - **Independent of UI/Database**: Can swap implementations
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation.
+See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed documentation.
 
 ## ✅ Best Practices
 

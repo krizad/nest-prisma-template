@@ -1,6 +1,7 @@
 .PHONY: help install dev build start test clean
 .PHONY: db-up db-down db-reset db-migrate db-seed db-studio
 .PHONY: docker-up docker-down docker-logs docker-clean
+.PHONY: typecheck lint-fix ci
 .DEFAULT_GOAL := help
 
 # Colors for output
@@ -60,6 +61,17 @@ lint: ## 🔍 Lint the code
 format: ## ✨ Format the code
 	@echo "$(CYAN)✨ Formatting code...$(RESET)"
 	@pnpm run format
+
+typecheck: ## 🔎 Run TypeScript type checking
+	@echo "$(CYAN)🔎 Running type check...$(RESET)"
+	@pnpm run typecheck
+
+lint-fix: ## 🔧 Lint and auto-fix the code
+	@echo "$(CYAN)🔧 Linting and fixing code...$(RESET)"
+	@pnpm exec eslint --fix 'src/**/*.ts'
+
+ci: lint typecheck test build ## 🏗️  Run full CI pipeline locally
+	@echo "$(GREEN)✅ All CI checks passed$(RESET)"
 
 ##@ Testing
 

@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import type { Request, Response as ExpressRes } from 'express';
 
 type ErrorBody = {
@@ -65,6 +66,28 @@ export class UnifiedErrorFilter implements ExceptionFilter {
       };
     }
 
+    // Handle Prisma Known Request Errors
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: this.handlePrismaError(err),
+        code: err.code,
+        details: undefined,
+        data: undefined,
+      };
+    }
+
+    // Handle Prisma Validation Errors
+    if (err instanceof Prisma.PrismaClientValidationError) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Validation error in database query',
+        code: undefined,
+        details: undefined,
+        data: undefined,
+      };
+    }
+
     if (err instanceof Error) {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -82,6 +105,23 @@ export class UnifiedErrorFilter implements ExceptionFilter {
       details: undefined,
       data: undefined,
     };
+  }
+
+  private handlePrismaError(
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): string {
+    switch (exception.code) {
+      case 'P2002':
+        return `Unique constraint failed on ${(exception.meta?.target as string[])?.join(', ') ?? 'unknown field'}`;
+      case 'P2025':
+        return 'Record not found';
+      case 'P2003':
+        return 'Foreign key constraint failed';
+      case 'P2014':
+        return 'Invalid ID';
+      default:
+        return 'Database operation failed';
+    }
   }
 
   private asErrorBody(body: unknown): ErrorBody | undefined {

@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS build
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
-RUN pnpm prisma:generate
+RUN pnpm generate
 RUN pnpm build
 RUN pnpm prune --prod
 

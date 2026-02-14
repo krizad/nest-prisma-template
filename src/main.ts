@@ -4,11 +4,20 @@ import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { UnifiedErrorFilter } from './common/filters';
+import helmet from 'helmet';
+import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
+
+  // Security
+  app.use(helmet());
+  app.use(compression());
+
+  // Graceful shutdown hooks
+  app.enableShutdownHooks();
 
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
@@ -106,13 +115,6 @@ async function bootstrap() {
   logger.log(`📚 Swagger URL: http://localhost:${port}/${swaggerPath}`);
   logger.log(`🗄️  Connected DB URL: ${maskedDatabaseUrl}`);
 
-  // Graceful shutdown
-  process.on('SIGTERM', () => {
-    logger.log('SIGTERM signal received: closing HTTP server');
-    void app.close().then(() => {
-      logger.log('HTTP server closed');
-    });
-  });
 }
 
 void bootstrap();

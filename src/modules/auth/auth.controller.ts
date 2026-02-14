@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './dto';
+import { LoginDto, LoginResponseDto, RefreshTokenDto } from './dto';
 import { Public } from '../../common/decorators';
 
 @ApiTags('Auth')
@@ -9,11 +9,6 @@ import { Public } from '../../common/decorators';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /**
-   * Login with email and password
-   * @param loginDto - Email and password
-   * @returns Access token and user data
-   */
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -29,5 +24,33 @@ export class AuthController {
   })
   login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(loginDto);
+  }
+
+  @Post('refresh')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed successfully',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired refresh token',
+  })
+  refresh(@Body() dto: RefreshTokenDto): Promise<LoginResponseDto> {
+    return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Logout (revoke refresh token)' })
+  @ApiResponse({
+    status: 204,
+    description: 'Logout successful',
+  })
+  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
+    await this.authService.logout(dto.refreshToken);
   }
 }
